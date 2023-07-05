@@ -1,0 +1,43 @@
+package modelo;
+
+import java.time.LocalDateTime;
+
+public class Mensagem {
+	   	private int id;
+	    private String texto;
+	    private Participante emitente;
+	    private Participante destinatario;
+	    private LocalDateTime dataHora;
+
+	    private static int proximoId = 1;
+
+	    public Mensagem(int id, Participante emitente, Participante destinatario, String texto, LocalDateTime datahora2) {
+	        this.id = proximoId++;
+	        this.emitente = emitente;
+	        this.destinatario = destinatario;
+	        this.texto = texto;
+	        this.dataHora = LocalDateTime.now();
+	    }
+
+	    public int getId() {
+	        return id;
+	    }
+
+	    public String getTexto() {
+	        return texto;
+	    }
+
+	    public Participante getRemetente() {
+	        return emitente;
+	    }
+
+	    public Participante getDestinatario() {
+	        return destinatario;
+	    }
+
+	    public LocalDateTime getDataHora() {
+	        return dataHora;
+	    }
+
+		
+}

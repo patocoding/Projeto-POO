@@ -1,0 +1,42 @@
+package modelo;
+
+import java.util.ArrayList;
+
+import modelo.Individual;
+import modelo.Mensagem;
+import modelo.Participante;
+
+public class Grupo extends Participante {
+	private ArrayList<Individual> individuos;
+
+    public Grupo(String nome) {
+        super(nome);
+        this.individuos = new ArrayList<>();
+    }
+
+    public ArrayList<Individual> getIndividuos() {
+        return individuos;
+    }
+
+    public void adicionarIndividuo(Individual individuo) {
+        individuos.add(individuo);
+    }
+
+    public void removerIndividuo(Individual individuo) {
+        individuos.remove(individuo);
+    }
+
+    @Override
+    public boolean isActive() {
+        return true; // Implemente o código para verificar se o grupo está ativo ou não.
+    }
+}
+
+class Administrador extends Individual {
+    public Administrador(String nome, String senha) {
+        super(nome, senha, administrador);
+
+    }
+}
+
+   

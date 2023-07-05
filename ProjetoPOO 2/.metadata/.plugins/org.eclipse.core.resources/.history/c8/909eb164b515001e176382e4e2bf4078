@@ -1,0 +1,235 @@
+package regras_negocio;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.function.Predicate;
+
+import modelo.Grupo;
+import modelo.Individual;
+import modelo.Mensagem;
+import modelo.Participante;
+import repositorio.Repositorio;
+
+public class Fachada {
+	private Fachada() {}
+
+	private static Repositorio repositorio = new Repositorio();
+
+
+	public static ArrayList<Individual> listarIndividuos() {
+		return repositorio.getIndividuos();	
+	}
+	
+	public static ArrayList<Grupo> listarGrupos() {
+		return repositorio.getGrupos();
+	}
+	
+	public static ArrayList<Mensagem> listarMensagens() {
+		return repositorio.getMensagens();
+	}
+
+	public static ArrayList<Mensagem> listarMensagensEnviadas(String nome) throws Exception{
+		Individual ind = repositorio.localizarIndividual(nome);	
+		if(ind == null) 
+			throw new Exception("listar mensagens enviadas - nome nao existe:" + nome);
+
+		return ind.getEnviadas();	
+	}
+
+	public static ArrayList<Mensagem> listarMensagensRecebidas(String nome) throws Exception{
+		Individual ind = repositorio.localizarIndividual(nome);	
+		if(ind == null) 
+			throw new Exception("listar mensagens recebidas - nome nao existe:" + nome);
+
+		return ind.getRecebidas();
+	}
+
+	public static void criarIndividuo(String nome, String senha) throws Exception {
+		if(nome.isEmpty()) 
+			throw new Exception("criar individual - nome vazio:");
+		if(senha.isEmpty()) 
+			throw new Exception("criar individual - senha vazia:");
+
+		Participante p = repositorio.localizarParticipante(nome);	
+		if(p != null) 
+			throw new Exception("criar individual - nome ja existe:" + nome);
+
+		Individual individuo = new Individual(nome, senha, false);
+		repositorio.adicionar(individuo);		
+	}
+
+	public static void criarAdministrador(String nome, String senha) throws Exception {
+		if(nome.isEmpty()) 
+			throw new Exception("criar administrador - nome vazio:");
+		if(senha.isEmpty()) 
+			throw new Exception("criar administrador - senha vazia:");
+
+		Participante p = repositorio.localizarParticipante(nome);	
+		if(p != null) 
+			throw new Exception("criar administrador - nome ja existe:" + nome);
+
+		Individual administrador = new Individual(nome, senha, true);
+		repositorio.adicionar(administrador);	
+	}
+
+	public static void criarGrupo(String nome) throws Exception {
+		Participante p = repositorio.localizarParticipante(nome);	
+		if(p != null) 
+			throw new Exception("criar grupo - nome ja existe:" + nome);
+
+		Grupo grupo = new Grupo(nome);
+		repositorio.adicionar(grupo);
+	}
+
+	public static void inserirGrupo(String nomeindividuo, String nomegrupo) throws Exception {
+		Individual individuo = repositorio.localizarIndividual(nomeindividuo);
+		if(individuo == null)
+			throw new Exception("inserir grupo - individuo nao existe: " + nomeindividuo);
+
+		Grupo grupo = repositorio.localizarGrupo(nomegrupo);
+		if(grupo == null)
+			throw new Exception("inserir grupo - grupo nao existe: " + nomegrupo);
+
+		if(individuo.localizarGrupo(nomegrupo) != null)
+			throw new Exception("inserir grupo - individuo ja pertence ao grupo: " + nomeindividuo);
+
+		grupo.adicionarIndividuo(individuo);
+	}
+
+	public static void enviarMensagem(String nomeRemetente, String nomeDestinatario, String texto) throws Exception {
+		Participante remetente = repositorio.localizarParticipante(nomeRemetente);
+		if(remetente == null)
+			throw new Exception("enviar mensagem - remetente nao existe: " + nomeRemetente);
+
+		Participante destinatario = repositorio.localizarParticipante(nomeDestinatario);
+		if(destinatario == null)
+			throw new Exception("enviar mensagem - destinatario nao existe: " + nomeDestinatario);
+
+		Mensagem mensagem = new Mensagem(0, remetente, destinatario, texto);
+		repositorio.adicionar(mensagem);
+	}
+
+	public static void removerMensagem(int id) throws Exception {
+		Mensagem mensagem = repositorio.localizarMensagem(id);
+		if(mensagem == null)
+			throw new Exception("remover mensagem - mensagem nao existe: " + id);
+
+		repositorio.remover(mensagem);
+	}
+
+	public static ArrayList<Mensagem> filtrarMensagensEnviadas(String nomeRemetente, Predicate<Mensagem> filtro) throws Exception {
+		ArrayList<Mensagem> mensagensEnviadas = listarMensagensEnviadas(nomeRemetente);
+		ArrayList<Mensagem> mensagensFiltradas = new ArrayList<>();
+
+		for (Mensagem mensagem : mensagensEnviadas) {
+			if (filtro.test(mensagem)) {
+				mensagensFiltradas.add(mensagem);
+			}
+		}
+
+		return mensagensFiltradas;
+	}
+
+	public static ArrayList<Mensagem> filtrarMensagensRecebidas(String nomeDestinatario, Predicate<Mensagem> filtro) throws Exception {
+		ArrayList<Mensagem> mensagensRecebidas = listarMensagensRecebidas(nomeDestinatario);
+		ArrayList<Mensagem> mensagensFiltradas = new ArrayList<>();
+
+		for (Mensagem mensagem : mensagensRecebidas) {
+			if (filtro.test(mensagem)) {
+				mensagensFiltradas.add(mensagem);
+			}
+		}
+
+		return mensagensFiltradas;
+	}
+
+	public static ArrayList<Mensagem> filtrarMensagens(Predicate<Mensagem> filtro) {
+		ArrayList<Mensagem> todasMensagens = repositorio.getMensagens();
+		ArrayList<Mensagem> mensagensFiltradas = new ArrayList<>();
+
+		for (Mensagem mensagem : todasMensagens) {
+			if (filtro.test(mensagem)) {
+				mensagensFiltradas.add(mensagem);
+			}
+		}
+
+		return mensagensFiltradas;
+	}
+
+//	public static void ordenarMensagensPorData(ArrayList<Mensagem> mensagens) {
+//		Collections.sort(mensagens);
+//	}
+	
+	 
+
+	public static void ordenarMensagensPorRemetente(ArrayList<Mensagem> mensagens) {
+		Collections.sort(mensagens, (m1, m2) -> m1.getRemetente().getNome().compareTo(m2.getRemetente().getNome()));
+	}
+
+	public static void ordenarMensagensPorDestinatario(ArrayList<Mensagem> mensagens) {
+		Collections.sort(mensagens, (m1, m2) -> m1.getDestinatario().getNome().compareTo(m2.getDestinatario().getNome()));
+	}
+
+	public static String[] ausentes(String string) {
+		return null;
+		// Usuários que ainda não mandaram nenhuma mensagem
+	}
+
+
+	public static void apagarMensagem(String nomeadministrador, int id) {
+	    Mensagem mensagem = repositorio.localizarMensagem(id);
+	    if (mensagem == null) {
+	        return; // Retorna sem fazer nada se a mensagem não existe
+	    }
+
+	    repositorio.remover(mensagem);
+	}
+
+	public static void removerGrupo(String nomeindividuo, String nomegrupo) {
+	    Individual individuo = repositorio.localizarIndividual(nomeindividuo);
+	    if (individuo == null) {
+	        return; // Retorna sem fazer nada se o indivíduo não existe
+	    }
+	    Grupo grupo = repositorio.localizarGrupo(nomegrupo);
+	    if (grupo == null) {
+	        return; // Retorna sem fazer nada se o grupo não existe
+	    }
+
+	    grupo.removerIndividuo(individuo);
+	}
+	
+	public static Mensagem[] espionarMensagens(String string, String string2) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static Mensagem[] obterConversa(String nomeindividuo, String nomedestinatario) {
+	    Individual individuo = repositorio.localizarIndividual(nomeindividuo);
+	    if (individuo == null) {
+	        return null; // Retorna null se o indivíduo não existe
+	    }
+
+	    Individual destinatario = repositorio.localizarIndividual(nomedestinatario);
+	    if (destinatario == null) {
+	        return null; // Retorna null se o destinatário não existe
+	    }
+
+	    ArrayList<Mensagem> conversa = new ArrayList<>();
+
+	    for (Mensagem mensagem : individuo.getEnviadas()) {
+	        if (mensagem.getDestinatario() == destinatario) {
+	            conversa.add(mensagem);
+	        }
+	    }
+
+	    for (Mensagem mensagem : destinatario.getEnviadas()) {
+	        if (mensagem.getDestinatario() == individuo) {
+	            conversa.add(mensagem);
+	        }
+	    }
+
+	    Collections.sort(conversa);
+	    return conversa.toArray(new Mensagem[0]);
+	}
+	}
+

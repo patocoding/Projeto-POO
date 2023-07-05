@@ -1,0 +1,56 @@
+package modelo;
+
+import java.util.ArrayList;
+
+public class Individual extends Participante {
+	  private String senha;
+	    protected boolean administrador;
+	    private ArrayList<Grupo> grupos;
+
+	    public Individual(String nome, String senha, boolean b) {
+	        super(nome);
+	        this.senha = senha;
+	        this.administrador = false;
+	        this.grupos = new ArrayList<>();
+	    }
+
+
+		public String getSenha() {
+	        return senha;
+	    }
+
+	    public boolean isAdministrador() {
+	        return administrador;
+	    }
+
+	    public ArrayList<Grupo> getGrupos() {
+	        return grupos;
+	    }
+
+	   
+
+	    public void removerGrupo(Grupo grupo) {
+	        grupos.remove(grupo);
+	    }
+
+		public Mensagem localizarEnviada(int id) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public Object localizarGrupo(String nome) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void removerEnviada(Mensagem m) {
+			// TODO Auto-generated method stub
+			
+		}
+
+
+		public void adicionarIndividuo(Grupo grupo) {
+			// TODO Auto-generated method stub
+			
+		}
+}
