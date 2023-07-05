@@ -1,10 +1,5 @@
 package appswing;
 
-/**********************************
- * IFPB - Curso Superior de Tec. em Sist. para Internet
- * Pesist~encia de Objetos
- * Prof. Fausto Maranh�o Ayres
- **********************************/
 
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -19,10 +14,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 
 import modelo.Individual;
+import regras_negocio.Fachada;
 
 public class TelaPrincipal {
 	private JFrame frame;
 	private JMenu mnParticipante;
+	private JMenu mnGrupo;
 	private JMenu mnLogar;
 	private JMenu mnConversa;
 	private JMenu mnMensagem;
@@ -63,6 +60,7 @@ public class TelaPrincipal {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		Fachada.carregar();
 		frame = new JFrame();
 		frame.setTitle("4TALK - Sem Participante logado");
 		frame.setBounds(100, 100, 450, 300);
@@ -73,9 +71,9 @@ public class TelaPrincipal {
 		label = new JLabel("New label");
 		label.setBounds(0, 0, 471, 251);
 		frame.getContentPane().add(label);
-		ImageIcon imagem = new ImageIcon(getClass().getResource("/imagens/JogoDeAzar.png"));
-		imagem = new ImageIcon(imagem.getImage().getScaledInstance(label.getWidth(),label.getHeight(), Image.SCALE_DEFAULT));
-		label.setIcon(imagem);
+//		ImageIcon imagem = new ImageIcon(getClass().getResource("../imagens/kamila1.png"));
+//		imagem = new ImageIcon(imagem.getImage().getScaledInstance(label.getWidth(),label.getHeight(), Image.SCALE_DEFAULT));
+//		label.setIcon(imagem);
 		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -88,7 +86,27 @@ public class TelaPrincipal {
 		menuBar.add(mnParticipante);
 
 		// -----------------------------------------------------------------
+		
+		
+	
 
+		mnGrupo = new JMenu("Grupo");
+		mnGrupo.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if (TelaPrincipal.logado == null) {
+					JOptionPane.showMessageDialog(null, "Vc precisa estar logado");
+					return;
+				}
+				if (!TelaPrincipal.logado.getAdministrador()) {
+					JOptionPane.showMessageDialog(null, "Vc precisa ser administrador");
+					return;
+				}
+				TelaGrupo telaGrupo = new TelaGrupo();
+				
+			}
+		});
+		menuBar.add(mnGrupo);
+		
 		mnLogar = new JMenu("Login");
 		mnLogar.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {

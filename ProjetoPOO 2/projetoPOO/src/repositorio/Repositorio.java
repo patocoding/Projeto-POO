@@ -4,88 +4,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import modelo.*;
-
 import java.util.TreeMap;
+
+import modelo.Grupo;
+import modelo.Individual;
+import modelo.Mensagem;
+import modelo.Participante;
+
 public class Repositorio {
-	private TreeMap<String, Participante> participantes  = new TreeMap<>();
-	private TreeMap<Integer, Mensagem> mensagens  = new TreeMap<>();
-	
-	public Repositorio() {
-		carregarObjetos();
-	}
-	
-	
-	public void adicionar(Participante part) {
-		participantes.put(part.getNome(), part);
-	}
-	
-	public void adicionarMensagem(Mensagem mensag, Participante emitente, Participante destinatario ) {
-		mensagens.put(mensag.getId(), mensag);
-		emitente.adicionarEnviada(mensag);
-		destinatario.adicionarRecebida(mensag);
-	}
-	
-	public ArrayList<Individual> getIndividuos(){
-		ArrayList<Individual> individuos = new ArrayList<>();
-		for(Participante part : participantes.values()) {
-			if(part instanceof Individual) {
-				individuos.add((Individual) part);
-			}
-		}
-		return individuos;
-	}
-	
-	public ArrayList<Grupo> getGrupos(){
-		ArrayList<Grupo> grupos = new ArrayList<>();
-		for(Participante part : participantes.values()) {
-			if(part instanceof Grupo) {
-				grupos.add((Grupo) part) ;
-			}
-		}
-		return grupos;
-	}
-	
-	public ArrayList<Mensagem> getMensagens(){
-		ArrayList<Mensagem> dadosMensagens = new ArrayList<>();
-		for(Mensagem men : mensagens.values()) {
-			dadosMensagens.add(men);
-		}
-		return dadosMensagens;
-	};
-	
-	public Individual localizarIndividual(String nome) {
-		Participante p = participantes.get(nome);
-		if (p instanceof Individual) {
-			Individual ind = (Individual) p;
-			return ind;
-		}
-		return null;
-	}
-	
-	public Participante localizarParticipante(String nome) {
-		return participantes.get(nome);
-	}
-	
-	public Grupo localizarGrupo(String nome) {
-		for(Participante grup : participantes.values()) {
-			if(grup instanceof Grupo) {
-				if(nome.equals(grup.getNome())) {
-					return (Grupo) grup;
-				}
-			}
-		}
-		return null;
-	}
-	
-	public Mensagem localizarMensagem(int id) {
-		return mensagens.get(id);
-	}
-	
-	public void remover(Mensagem men) {
-		mensagens.remove(men.getId());
-	}
+	public TreeMap<String,Participante> participantes = new TreeMap<String, Participante>();
+	public TreeMap<Integer,Mensagem> mensagens = new TreeMap<Integer, Mensagem>();
 	
 	public void carregarObjetos()  	{
 		// carregar para o repositorio os objetos dos arquivos csv
@@ -122,6 +50,7 @@ public class Repositorio {
 				administrador = partes[2];
 				Individual ind = new Individual(nome,senha,Boolean.parseBoolean(administrador));
 				this.adicionar(ind);
+				// inserir na tree map
 			}
 			arquivo1.close();
 		}
@@ -172,7 +101,7 @@ public class Repositorio {
 				emitente = this.localizarParticipante(nomeemitente);
 				destinatario = this.localizarParticipante(nomedestinatario);
 				m = new Mensagem(Integer.parseInt(id),emitente,destinatario,texto);
-				this.adicionarMensagem(m, emitente, destinatario);
+				this.adicionar(m);
 			} 
 			arquivo3.close();
 		}
@@ -186,17 +115,17 @@ public class Repositorio {
 	public void	salvarObjetos()  {
 		//gravar nos arquivos csv os objetos que estão no repositório
 		try	{
+		
 			File f = new File( new File(".\\mensagens.csv").getCanonicalPath())  ;
 			FileWriter arquivo1 = new FileWriter(f); 
-			for(Mensagem m : mensagens.values()) 	{
+			for(Mensagem m : mensagens.values()) { //treemap
 				arquivo1.write(	m.getId()+";"+
 						m.getEmitente().getNome()+";"+
 						m.getDestinatario().getNome()+";"+
 						m.getTexto()+"\n");	
-			} 
+			}
 			arquivo1.close();
-		}
-		catch(Exception e){
+		}catch(Exception e){
 			throw new RuntimeException("problema na criação do arquivo  mensagens "+e.getMessage());
 		}
 
@@ -227,4 +156,78 @@ public class Repositorio {
 			throw new RuntimeException("problema na criação do arquivo  grupos "+e.getMessage());
 		}
 	}
+	
+	public Individual localizarIndividual(String nome) {
+		Individual individuo = (Individual)participantes.get(nome);
+		return individuo;
+	}
+	
+	public Participante localizarParticipante(String nome) {
+		Participante participante = participantes.get(nome);
+		return participante;
+	}
+	
+	public void adicionar(Object objeto) {
+		if (objeto instanceof Individual) {
+			participantes.put(((Individual) objeto).getNome(), (Individual) objeto);
+			
+		}else if(objeto instanceof Grupo) {
+			participantes.put(((Grupo) objeto).getNome(), (Grupo) objeto);
+			
+		}else {
+			mensagens.put(((Mensagem) objeto).getId(),(Mensagem)objeto);
+		}
+		
+	}
+	
+	public void remover(Object objeto) {
+		if (objeto instanceof Individual) {
+			participantes.remove(((Individual) objeto).getNome());
+			
+		}else if(objeto instanceof Grupo) {
+			participantes.remove(((Grupo) objeto).getNome());
+			
+		}else {
+			mensagens.remove(((Mensagem) objeto).getId());
+		}
+		
+	}
+	
+	public ArrayList<Grupo> getGrupos() {
+		ArrayList<Grupo> grupos = new ArrayList<Grupo>();
+		for(Participante p : participantes.values()) {
+			if (p instanceof Grupo) {
+				grupos.add((Grupo) p);
+			}
+		}
+		return grupos;
+	}
+	
+	public ArrayList<Individual> getIndividuos() {
+		ArrayList<Individual> individuos = new ArrayList<Individual>();
+		for(Participante p : participantes.values()) {
+			if (p instanceof Individual) {
+				individuos.add((Individual) p);
+			}
+		}
+		return individuos;
+	}
+	
+	public ArrayList<Mensagem> getMenssagens(){
+		ArrayList<Mensagem> ListaDeMensagens = new ArrayList<>();
+		for(Mensagem m : mensagens.values()) {
+			ListaDeMensagens.add(m);
+		}
+		return ListaDeMensagens;
+	}
+	
+	public int maiorId() {
+		int maiorId = 0;
+		for(Mensagem m : mensagens.values()) {
+			if(m.getId() > maiorId) { maiorId = m.getId();}
+		}
+		return maiorId + 1;
+	}
+	
+	
 }
